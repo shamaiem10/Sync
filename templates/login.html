@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SYN – Your Second Brain 🧠</title>
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at 50% 30%, #1e0037, #0a001f);
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: #c77dff33;
+  filter: blur(100px);
+  border-radius: 50%;
+  top: 10%;
+  left: 60%;
+  z-index: 0;
+}
+
+form {
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 40px;
+  border-radius: 16px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 30px #8e44ad55;
+  width: 350px;
+  text-align: center;
+  border: 1px solid #ffffff22;
+}
+
+h2 {
+  color: #e0b0ff;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  text-align: left;
+  margin: 10px 0 4px;
+  font-size: 13px;
+  color: #ddd;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #c77dff55;
+  background: #1e1e2f;
+  color: #fff;
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: #c77dff;
+  outline: none;
+  box-shadow: 0 0 10px #c77dff66;
+}
+
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #c77dff, #9d4edd);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  background: #6f42c1;
+  box-shadow: 0 0 10px #9d4eddaa;
+}
+
+.footer {
+  margin-top: 20px;
+  font-size: 11px;
+  color: #999;
+}
+
+  </style>
+</head>
+<body>
+
+  <form action="/" method="POST">
+    <h2>🔐 Welcome to SYN</h2>
+
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br>
+
+    <button type="submit">Log In</button>
+
+    <div class="footer">
+      SYN remembers everything... except bad vibes 💫
+    </div>
+  </form>
+
+</body>
+</html>
