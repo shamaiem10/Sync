@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create New Project – Syn</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+      color: #2d4739;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: 600;
+      color: #3a614d;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      margin-top: 25px;
+      background-color: #3a614d;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #2e4c3b;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Create a New Project</h2>
+    <form method="POST">
+  <label for="title">Project Title</label>
+  <input type="text" name="title" id="title" required>
+
+  <label for="description">Description</label>
+  <textarea name="description" id="description" rows="4"></textarea>
+
+  <label for="deadline">Deadline</label>
+  <input type="date" name="deadline" id="deadline">
+
+  <label for="members">Add Members (by email)</label>
+  <input type="text" name="members" id="members" placeholder="Enter emails separated by commas">
+
+  <button type="submit">Create Project</button>
+</form>
+
+  </div>
+</body>
+</html>

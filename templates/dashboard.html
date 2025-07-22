@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard – Syn</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #2d4739;
+    }
+
+    .dashboard {
+      max-width: 1000px;
+      margin: 60px auto;
+      background: #ffffff;
+      padding: 40px 50px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .dashboard-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .logout-icon {
+      font-size: 18px;
+      color: #1a73e8;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .logout-icon:hover {
+      color: #0f59c7;
+    }
+
+    .intro {
+      font-size: 15px;
+      color: #444;
+      margin-bottom: 40px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 25px 20px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background-color: #e6f5d0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #3a614d;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: #555;
+      margin: 0;
+    }
+
+    .notification-wrapper {
+      position: relative;
+    }
+
+    .bell-icon {
+      font-size: 18px;
+      color: #3a614d;
+      cursor: pointer;
+    }
+
+    .badge {
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 35px;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      width: 280px;
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .hidden {
+      display: none;
+    }
+    .dropdown.hidden {
+  display: none;
+}
+
+
+    .invite-card {
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .invite-card form {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .invite-card button {
+      background-color: #3a614d;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .invite-card button:hover {
+      background-color: #2d4739;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1>Welcome, {{ name }}</h1>
+      <div style="display: flex; gap: 20px; align-items: center; position: relative;">
+        <div class="notification-wrapper">
+          <a href="#" onclick="toggleDropdown(event)" title="Invitations" class="bell-icon">
+            <i class="fas fa-bell"></i>
+            {% if invite_count > 0 %}
+              <span class="badge">{{ invite_count }}</span>
+            {% endif %}
+          </a>
+
+          <div id="dropdown" class="dropdown hidden">
+            {% if invitations %}
+              {% for invite in invitations %}
+                <div class="invite-card">
+                  <p><strong>{{ invite.inviter_name }}</strong> invited you to <em>{{ invite.project_title }}</em></p>
+                  <form method="POST" action="/respond_invite">
+                    <input type="hidden" name="invite_id" value="{{ invite.id }}">
+                    <button name="response" value="accept">Accept</button>
+                    <button name="response" value="decline">Decline</button>
+                  </form>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p style="padding: 10px;">No new invitations.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <a href="/logout" class="logout-icon" title="Logout">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>
+
+    <p class="intro">Select an action to begin working with your team in Syn:</p>
+
+    <div class="options">
+      <div class="card" onclick="window.location.href='/create'">
+        <h3>Create New Project</h3>
+        <p>Start a fresh group workspace with tasks</p>
+      </div>
+
+      <div class="card">
+        <h3>Join a Project</h3>
+        <p>Use an invite to become part of an existing team</p>
+      </div>
+
+      <div class="card">
+        <h3>View My Projects</h3>
+        <p>Track your tasks and team progress</p>
+      </div>
+
+      <div class="card">
+        <h3>Account Settings</h3>
+        <p>Update your name, email or password</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleDropdown(event) {
+      event.preventDefault();
+      const dropdown = document.getElementById('dropdown');
+      dropdown.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>
