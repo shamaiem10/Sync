@@ -54,7 +54,18 @@ CREATE TABLE IF NOT EXISTS invitations (
 );
 """)
 
-
+cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            status TEXT CHECK(status IN ('not started', 'in progress', 'completed')) DEFAULT 'not started',
+            assigned_to INTEGER,
+            project_id INTEGER,
+            FOREIGN KEY (assigned_to) REFERENCES users(id),
+            FOREIGN KEY (project_id) REFERENCES projects(id)
+        )
+    """)
 
 conn.commit()
 conn.close()

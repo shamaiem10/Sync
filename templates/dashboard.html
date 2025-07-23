@@ -178,8 +178,8 @@
                   <p><strong>{{ invite.inviter_name }}</strong> invited you to <em>{{ invite.project_title }}</em></p>
                   <form method="POST" action="/respond_invite">
                     <input type="hidden" name="invite_id" value="{{ invite.id }}">
-                    <button name="response" value="accept">Accept</button>
-                    <button name="response" value="decline">Decline</button>
+                    <button name="response" value="accepted">Accept</button>
+                    <button name="response" value="declined">Decline</button>
                   </form>
                 </div>
               {% endfor %}
@@ -208,10 +208,11 @@
         <p>Use an invite to become part of an existing team</p>
       </div>
 
-      <div class="card">
-        <h3>View My Projects</h3>
-        <p>Track your tasks and team progress</p>
-      </div>
+      <div class="card" onclick="window.location.href='/my-projects'">
+  <h3>View My Projects</h3>
+  <p>Track your tasks and team progress</p>
+</div>
+
 
       <div class="card">
         <h3>Account Settings</h3>

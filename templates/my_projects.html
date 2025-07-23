@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Projects – Syn</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    body {
+      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #2d4739;
+    }
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+    h2 {
+      margin-bottom: 30px;
+      color: #3a614d;
+    }
+    .project-card {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background: #f8fef9;
+    }
+    .project-card h3 {
+      margin-top: 0;
+      color: #2d4739;
+    }
+    .meta {
+      font-size: 14px;
+      color: #555;
+    }
+    .btn {
+      background: #3a614d;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background: #2e4c3b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>My Projects</h2>
+    {% if projects %}
+      {% for project in projects %}
+        <div class="project-card">
+          <h3>{{ project['title'] }}</h3>
+          <p>{{ project['description'] }}</p>
+          <p class="meta">Deadline: {{ project['deadline'] }}</p>
+          <p class="meta">Your Role: {{ project['role'] }}</p>
+          <a href="/project/{{ project['id'] }}" class="btn">View Details</a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>You are not part of any projects yet.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

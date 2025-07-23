@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{ project['title'] }} – Syn</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
+      padding: 40px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+    h1 {
+      color: #2d4739;
+    }
+    .section {
+      margin-top: 30px;
+    }
+    .section h3 {
+      color: #3a614d;
+      margin-bottom: 10px;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .task {
+      background: #f7fafc;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 4px solid #3a614d;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      color: #3a614d;
+    }
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background: #3a614d;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2e4c3b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>{{ project['title'] }}</h1>
+    <p><strong>Description:</strong> {{ project['description'] }}</p>
+    <p><strong>Deadline:</strong> {{ project['deadline'] }}</p>
+
+    <div class="section">
+        <h3><i class="bi bi-people-fill"></i> Project Members</h3>
+      <ul>
+        {% for m in members %}
+          <li>{{ m['name'] }} ({{ m['email'] }}) – {{ m['role'] }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3><i class="bi bi-list-task"></i> Tasks</h3>
+      {% if tasks %}
+            {% for task in tasks %}
+  <div class="task-card" style="
+    border: 1px solid #e0e0e0;
+    border-left: 5px solid 
+      {% if task['status'] == 'not started' %}#999
+      {% elif task['status'] == 'in progress' %}#ffb400
+      {% elif task['status'] == 'completed' %}#28a745
+      {% else %}#ccc
+      {% endif %};
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fefefe;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  ">
+    <h4 style="margin: 0 0 8px; color: #2d4739;">{{ task['title'] }}</h4>
+    <p style="margin: 0 0 6px;">{{ task['description'] }}</p>
+    <p style="margin: 0; font-size: 14px; color: #666;">
+      <i class="bi bi-person-circle"></i> Assigned to: <strong>{{ task['assignee_name'] }}</strong>
+      <br>
+      <i class="bi bi-info-circle"></i> Status:
+
+{% if task['assigned_to']|int == session['user_id']|int %}
+
+  <form method="POST" action="/update_task_status/{{ task['id'] }}" style="display: inline;">
+    <select name="status" onchange="this.form.submit()" style="padding: 2px 6px; font-size: 14px;">
+      <option value="not started" {% if task['status'] == 'not started' %}selected{% endif %}>Not Started</option>
+      <option value="in progress" {% if task['status'] == 'in progress' %}selected{% endif %}>In Progress</option>
+      <option value="completed" {% if task['status'] == 'completed' %}selected{% endif %}>Completed</option>
+    </select>
+  </form>
+{% else %}
+  <em>{{ task['status']|capitalize }}</em>
+{% endif %}
+
+    </p>
+
+    {% if is_leader %}
+      <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 8px;">
+        <a href="/edit_task/{{ task['id'] }}?project_id={{ project['id'] }}" 
+           class="btn btn-sm btn-outline-primary" 
+           title="Edit Task">
+          <i class="bi bi-pencil-fill"></i>
+        </a>
+        <form method="POST" action="/delete_task/{{ task['id'] }}" style="display: inline;">
+          <input type="hidden" name="project_id" value="{{ project['id'] }}">
+          <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Task">
+            <i class="bi bi-trash3-fill"></i>
+          </button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+{% endfor %}
+
+      {% else %}
+        <p>No tasks added yet.</p>
+      {% endif %}
+    </div>
+
+    {% if is_leader %}
+    <div class="section">
+      <h3><i class="bi bi-plus-circle"></i> Add a New Task</h3>
+      <form method="POST">
+        <div class="form-group">
+          <label for="task_title">Task Title:</label>
+          <input type="text" name="task_title" id="task_title" required>
+        </div>
+
+        <div class="form-group">
+          <label for="task_description">Description:</label>
+          <textarea name="task_description" id="task_description" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="assigned_to">Assign To:</label>
+          <select name="assigned_to" id="assigned_to">
+            {% for member in members %}
+              <option value="{{ member.id }}">{{ member.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit">Add Task</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>

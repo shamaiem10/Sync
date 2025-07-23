@@ -161,6 +161,217 @@ def create_project():
 
     return render_template('create_project.html')
 
-# --- Run App ---
+
+
+
+@app.route('/respond_invite', methods=['POST'])
+def respond_invite():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    invite_id = request.form['invite_id']
+    response = request.form['response']  # should be 'accepted' or 'declined'
+
+    if response not in ['accepted', 'declined']:
+        return "Invalid response"
+
+    try:
+        with sqlite3.connect("data.db") as conn:
+            c = conn.cursor()
+
+            # 1. Get project_id and invited_user_id
+            c.execute("SELECT project_id, invited_user_id FROM invitations WHERE id = ?", (invite_id,))
+            invite = c.fetchone()
+
+            if not invite:
+                return "Invitation not found."
+
+            project_id = invite[0]
+            invited_user_id = invite[1]
+
+            # 2. Update invitation status
+            c.execute("UPDATE invitations SET status = ? WHERE id = ?", (response, invite_id))
+
+            # 3. If accepted, add to project_members
+            if response == 'accepted':
+                c.execute("""
+                    INSERT INTO project_members (project_id, user_id, role)
+                    VALUES (?, ?, ?)
+                """, (project_id, invited_user_id, 'member'))
+
+    except sqlite3.OperationalError as e:
+        return f"Database error: {e}"
+
+    return redirect('/dashboard')
+@app.route('/my-projects')
+def my_projects():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT p.id, p.title, p.description, p.deadline, pm.role
+        FROM project_members pm
+        JOIN projects p ON pm.project_id = p.id
+        WHERE pm.user_id = ?
+    """, (user_id,))
+
+    projects = cursor.fetchall()
+    conn.close()
+
+    return render_template('my_projects.html', projects=projects)
+
+
+@app.route('/project/<int:project_id>', methods=['GET', 'POST'])
+def project_details(project_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    user_id = session['user_id']
+
+    # Get project info
+    c.execute("SELECT * FROM projects WHERE id = ?", (project_id,))
+    project = c.fetchone()
+
+    # Check if user is a leader
+    c.execute("SELECT role FROM project_members WHERE project_id = ? AND user_id = ?", (project_id, user_id))
+    role = c.fetchone()
+    is_leader = role and role['role'] == 'leader'
+
+    # Handle task creation if POST and user is a leader
+    if request.method == 'POST' and is_leader:
+        task_title = request.form['task_title']
+        task_description = request.form['task_description']
+        assigned_to = request.form['assigned_to']
+        
+        # Use the correct status allowed by your schema
+        status = 'not started'
+
+        c.execute("""
+            INSERT INTO tasks (title, description, status, assigned_to, project_id)
+            VALUES (?, ?, ?, ?, ?)
+        """, (task_title, task_description, status, assigned_to, project_id))
+        conn.commit()
+
+    # Get all members of the project
+    c.execute("""
+        SELECT u.id, u.name, u.email, pm.role
+        FROM project_members pm
+        JOIN users u ON pm.user_id = u.id
+        WHERE pm.project_id = ?
+    """, (project_id,))
+    members = c.fetchall()
+
+    # Get all tasks for the project
+    c.execute("""
+    SELECT t.id, t.title, t.description, t.status, t.assigned_to, u.name as assignee_name
+    FROM tasks t
+    JOIN users u ON t.assigned_to = u.id
+    WHERE t.project_id = ?
+""", (project_id,))
+
+    tasks = c.fetchall()
+
+    conn.close()
+
+    return render_template('project_details.html',
+                           project=project,
+                           members=members,
+                           tasks=tasks,
+                           is_leader=is_leader)
+
+
+@app.route('/delete_task/<int:task_id>', methods=['POST'])
+def delete_task(task_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    project_id = request.form['project_id']
+    conn = get_db_connection()
+    c = conn.cursor()
+
+    # Optionally: verify user is project leader here
+    c.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(f'/project/{project_id}')
+
+
+
+@app.route('/update_task_status/<int:task_id>', methods=['POST'])
+def update_task_status(task_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    new_status = request.form['status']
+    user_id = session['user_id']
+
+    conn = get_db_connection()
+    c = conn.cursor()
+
+    # Check if the task is assigned to this user (extra security)
+    c.execute("SELECT assigned_to FROM tasks WHERE id = ?", (task_id,))
+    task = c.fetchone()
+
+    if task and task['assigned_to'] == user_id:
+        c.execute("UPDATE tasks SET status = ? WHERE id = ?", (new_status, task_id))
+        conn.commit()
+
+    conn.close()
+
+    # Redirect back to the same project page
+    project_id = request.args.get("project_id")
+    return redirect(f"/project/{project_id}" if project_id else "/dashboard")
+
+
+
+@app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
+def edit_task(task_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    project_id = request.args.get('project_id')
+    conn = get_db_connection()
+    c = conn.cursor()
+
+    # Fetch the task
+    c.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    task = c.fetchone()
+
+    # Fetch project members for dropdown
+    c.execute("""
+        SELECT u.id, u.name FROM users u
+        JOIN project_members pm ON u.id = pm.user_id
+        WHERE pm.project_id = ?
+    """, (project_id,))
+    members = c.fetchall()
+
+    if request.method == 'POST':
+        new_title = request.form['title']
+        new_description = request.form['description']
+        new_assignee = request.form['assigned_to']
+
+        c.execute("""
+            UPDATE tasks
+            SET title = ?, description = ?, assigned_to = ?
+            WHERE id = ?
+        """, (new_title, new_description, new_assignee, task_id))
+
+        conn.commit()
+        conn.close()
+        return redirect(f'/project/{project_id}')
+
+    conn.close()
+    return render_template('edit_task.html', task=task, members=members, project_id=project_id)
+
 if __name__ == '__main__':
     app.run(debug=True)
