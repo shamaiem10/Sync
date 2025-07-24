@@ -1,6 +1,7 @@
+# SYN Project Manager
 A lightweight, intuitive task and project management web app designed to simplify collaboration within university teams and student groups. Create projects, invite members, assign tasks, and track progress — all in one place.
 
-🚀 Features
+## 🚀 Features
 🔐 User authentication (Signup/Login)
 
 📁 Project creation and management
@@ -13,9 +14,9 @@ A lightweight, intuitive task and project management web app designed to simplif
 
 🔎 Clean and responsive UI (Google-style login/signup layout)
 
-🛠️ Tech Stack
-Backend: Python (Flask)
+## 🛠️ Tech Stack
+- Backend: Python (Flask)
 
-Frontend: HTML, CSS
+- Frontend: HTML, CSS
 
-Database: SQLite
+- Database: SQLite
