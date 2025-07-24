@@ -2,138 +2,143 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard – Syn</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>Dashboard – Sync</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body {
-      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
-      font-family: 'Segoe UI', sans-serif;
+    :root {
+      --primary: #3a614d;
+      --accent: #e6f5d0;
+      --text: #2d4739;
+      --muted: #777;
+      --radius: 14px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      color: #2d4739;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #d0e8f2, #e6f5d0); /* Your original background */
+      color: var(--text);
+      padding: 60px 30px;
     }
 
     .dashboard {
-      max-width: 1000px;
-      margin: 60px auto;
+      max-width: 1200px;
+      margin: auto;
       background: #ffffff;
-      padding: 40px 50px;
-      border-radius: 16px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-      position: relative;
+      padding: 50px 60px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
     .dashboard-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .dashboard-header h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0;
-    }
-
-    .logout-icon {
-      font-size: 18px;
-      color: #1a73e8;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .logout-icon:hover {
-      color: #0f59c7;
-    }
-
-    .intro {
-      font-size: 15px;
-      color: #444;
       margin-bottom: 40px;
     }
 
-    .options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 20px;
+    .dashboard-header h1 {
+      font-size: 26px;
+      font-weight: 600;
     }
 
-    .card {
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 25px 20px;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-      cursor: pointer;
-    }
-
-    .card:hover {
-      background-color: #e6f5d0;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transform: translateY(-2px);
-    }
-
-    .card h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #3a614d;
-    }
-
-    .card p {
-      font-size: 13px;
-      color: #555;
-      margin: 0;
-    }
-
-    .notification-wrapper {
-      position: relative;
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
     }
 
     .bell-icon {
-      font-size: 18px;
-      color: #3a614d;
+      position: relative;
+      font-size: 20px;
+      color: var(--text);
       cursor: pointer;
     }
 
     .badge {
+      position: absolute;
+      top: -6px;
+      right: -8px;
       background: red;
-      color: white;
+      color: #fff;
+      font-size: 11px;
       border-radius: 50%;
       padding: 2px 6px;
-      font-size: 12px;
-      position: absolute;
-      top: -8px;
-      right: -8px;
+    }
+
+    .logout-icon {
+      color: var(--primary);
+      font-size: 18px;
+      text-decoration: none;
+    }
+
+    .intro {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 30px 25px;
+      border-radius: var(--radius);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .card h3 {
+      font-size: 17px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--muted);
     }
 
     .dropdown {
+      display: none;
       position: absolute;
       top: 35px;
       right: 0;
-      background: white;
+      background: #fff;
       border: 1px solid #ccc;
-      width: 280px;
-      padding: 10px;
-      border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      width: 300px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       z-index: 10;
     }
 
-    .hidden {
-      display: none;
+    .dropdown.active {
+      display: block;
     }
-    .dropdown.hidden {
-  display: none;
-}
-
 
     .invite-card {
-      margin-bottom: 12px;
-      font-size: 14px;
+      margin-bottom: 15px;
     }
 
     .invite-card form {
@@ -143,18 +148,23 @@
     }
 
     .invite-card button {
-      background-color: #3a614d;
+      background: var(--primary);
       color: white;
       border: none;
       padding: 5px 10px;
-      font-size: 12px;
+      font-size: 13px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s;
     }
 
     .invite-card button:hover {
       background-color: #2d4739;
+    }
+
+    @media (max-width: 700px) {
+      .dashboard {
+        padding: 30px 20px;
+      }
     }
   </style>
 </head>
@@ -162,16 +172,14 @@
   <div class="dashboard">
     <div class="dashboard-header">
       <h1>Welcome, {{ name }}</h1>
-      <div style="display: flex; gap: 20px; align-items: center; position: relative;">
+      <div class="header-right">
         <div class="notification-wrapper">
-          <a href="#" onclick="toggleDropdown(event)" title="Invitations" class="bell-icon">
-            <i class="fas fa-bell"></i>
+          <i class="fas fa-bell bell-icon" onclick="toggleDropdown()">
             {% if invite_count > 0 %}
               <span class="badge">{{ invite_count }}</span>
             {% endif %}
-          </a>
-
-          <div id="dropdown" class="dropdown hidden">
+          </i>
+          <div id="dropdown" class="dropdown">
             {% if invitations %}
               {% for invite in invitations %}
                 <div class="invite-card">
@@ -184,48 +192,51 @@
                 </div>
               {% endfor %}
             {% else %}
-              <p style="padding: 10px;">No new invitations.</p>
+              <p>No new invitations.</p>
             {% endif %}
           </div>
         </div>
-
         <a href="/logout" class="logout-icon" title="Logout">
           <i class="fas fa-sign-out-alt"></i>
         </a>
       </div>
     </div>
 
-    <p class="intro">Select an action to begin working with your team in Syn:</p>
+    <p class="intro">Start collaborating by choosing an action below:</p>
 
     <div class="options">
       <div class="card" onclick="window.location.href='/create'">
-        <h3>Create New Project</h3>
-        <p>Start a fresh group workspace with tasks</p>
+        <h3><i class="fas fa-plus-circle"></i> New Project</h3>
+        <p>Kickstart a new workspace for your team.</p>
       </div>
 
-      <div class="card">
-        <h3>Join a Project</h3>
-        <p>Use an invite to become part of an existing team</p>
-      </div>
+      <a href="/join" style="text-decoration: none; color: inherit;">
+  <div class="card">
+    <h3><i class="fas fa-link"></i> Join Project</h3>
+    <p>Use an invite to join an existing project.</p>
+  </div>
+</a>
+
 
       <div class="card" onclick="window.location.href='/my-projects'">
-  <h3>View My Projects</h3>
-  <p>Track your tasks and team progress</p>
-</div>
-
-
-      <div class="card">
-        <h3>Account Settings</h3>
-        <p>Update your name, email or password</p>
+        <h3><i class="fas fa-folder-open"></i> My Projects</h3>
+        <p>Check status and updates across projects.</p>
       </div>
+
+      <a href="/profile" style="text-decoration: none; color: inherit;">
+  <div class="card">
+    <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
+    <p>Manage your name, email, or password.</p>
+  </div>
+</a>
+
     </div>
   </div>
 
   <script>
-    function toggleDropdown(event) {
-      event.preventDefault();
-      const dropdown = document.getElementById('dropdown');
-      dropdown.classList.toggle('hidden');
+    function toggleDropdown() {
+      const dropdown = document.getElementById("dropdown");
+      dropdown.classList.toggle("active");
     }
   </script>
 </body>

@@ -2,75 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Projects – Syn</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>My Projects – Sync</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #d0e8f2, #e6f5d0);
       color: #2d4739;
+      overflow-x: hidden;
+      position: relative;
     }
+
     .container {
-      max-width: 900px;
-      margin: 50px auto;
-      padding: 30px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      max-width: 1100px;
+      margin: 80px auto;
+      padding: 40px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 1;
     }
+
     h2 {
-      margin-bottom: 30px;
-      color: #3a614d;
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 40px;
+      color: #2d4739;
+      font-weight: 700;
     }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+    }
+
     .project-card {
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      background: #f8fef9;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 24px;
+      transition: 0.4s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+      position: relative;
     }
+
+    .project-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
     .project-card h3 {
-      margin-top: 0;
+      font-size: 22px;
+      margin: 0 0 10px;
       color: #2d4739;
     }
-    .meta {
+
+    .project-card p {
       font-size: 14px;
-      color: #555;
+      margin: 6px 0;
+      color: #444;
     }
-    .btn {
+
+    .badge {
+      display: inline-block;
       background: #3a614d;
       color: white;
-      padding: 8px 14px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-      text-decoration: none;
-      display: inline-block;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin: 5px 6px 12px 0;
     }
+
+    .btn {
+      margin-top: 15px;
+      display: inline-block;
+      text-decoration: none;
+      background: linear-gradient(to right, #3a614d, #628c6f);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
     .btn:hover {
-      background: #2e4c3b;
+      background: linear-gradient(to right, #2e4c3b, #50715a);
+    }
+
+    .no-projects {
+      text-align: center;
+      font-size: 16px;
+      margin-top: 40px;
+      color: #555;
+    }
+
+    /* Optional fancy background blobs */
+    .blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(#bae4c6, transparent 70%);
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .blob.top-left {
+      top: -100px;
+      left: -100px;
+    }
+
+    .blob.bottom-right {
+      bottom: -120px;
+      right: -100px;
     }
   </style>
 </head>
 <body>
+
+  <div class="blob top-left"></div>
+  <div class="blob bottom-right"></div>
+
   <div class="container">
     <h2>My Projects</h2>
+
     {% if projects %}
-      {% for project in projects %}
-        <div class="project-card">
-          <h3>{{ project['title'] }}</h3>
-          <p>{{ project['description'] }}</p>
-          <p class="meta">Deadline: {{ project['deadline'] }}</p>
-          <p class="meta">Your Role: {{ project['role'] }}</p>
-          <a href="/project/{{ project['id'] }}" class="btn">View Details</a>
-        </div>
-      {% endfor %}
+      <div class="project-grid">
+        {% for project in projects %}
+          <div class="project-card">
+            <h3>{{ project['title'] }}</h3>
+            <p>{{ project['description'] }}</p>
+            <div class="badge">Deadline: {{ project['deadline'] }}</div>
+            <div class="badge">Role: {{ project['role'] }}</div>
+            <a href="/project/{{ project['id'] }}" class="btn">
+              <i class="fas fa-arrow-right"></i> View Details
+            </a>
+          </div>
+        {% endfor %}
+      </div>
     {% else %}
-      <p>You are not part of any projects yet.</p>
+      <p class="no-projects">You are not part of any projects yet.</p>
     {% endif %}
   </div>
+
 </body>
 </html>

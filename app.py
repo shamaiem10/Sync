@@ -373,5 +373,59 @@ def edit_task(task_id):
     conn.close()
     return render_template('edit_task.html', task=task, members=members, project_id=project_id)
 
+
+
+@app.route('/')
+def intro():
+    return render_template('intro.html')
+
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    user_id = session['user_id']
+    conn = get_db_connection()
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        new_name = request.form['name']
+        new_email = request.form['email']
+        new_password = request.form['password']
+
+        if new_password:
+            hashed_password = generate_password_hash(new_password)
+            c.execute("""
+                UPDATE users
+                SET name = ?, email = ?, password = ?
+                WHERE id = ?
+            """, (new_name, new_email, hashed_password, user_id))
+        else:
+            c.execute("""
+                UPDATE users
+                SET name = ?, email = ?
+                WHERE id = ?
+            """, (new_name, new_email, user_id))
+
+        conn.commit()
+        flash('Profile updated successfully!')
+        return redirect('/profile')
+
+    # GET request
+    c.execute("SELECT id, name, email FROM users WHERE id = ?", (user_id,))
+    user = c.fetchone()
+    conn.close()
+
+    return render_template('profile.html', user=user)
+
+
+@app.route('/join')
+def join_project_page():
+   
+    return render_template("join.html")
+
+
 if __name__ == '__main__':
     app.run(debug=True)
