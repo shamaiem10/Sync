@@ -1,6 +1,10 @@
 from flask import Flask, render_template, session, url_for, request, redirect, flash
 import sqlite3
+import random
+import string
 from werkzeug.security import generate_password_hash, check_password_hash
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = 'syn-secret'  # Needed for session
@@ -110,6 +114,10 @@ def logout():
     session.clear()
     return redirect('/login')
 
+
+def generate_join_code(length=6):
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
 @app.route('/create', methods=['GET', 'POST'])
 def create_project():
     if 'user_id' not in session:
@@ -120,18 +128,20 @@ def create_project():
         description = request.form['description']
         deadline = request.form['deadline']
         member_emails = request.form['members'].split(',')
-
         user_id = session['user_id']
+
+        # generate random 6-character code
+        join_code = generate_join_code()
 
         conn = sqlite3.connect("data.db")
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
 
-        # 1. Create project
+        # 1. Create project with join code
         c.execute("""
-            INSERT INTO projects (title, description, deadline, created_by)
-            VALUES (?, ?, ?, ?)
-        """, (title, description, deadline, user_id))
+            INSERT INTO projects (title, description, deadline, created_by, join_code)
+            VALUES (?, ?, ?, ?, ?)
+        """, (title, description, deadline, user_id, join_code))
         project_id = c.lastrowid
 
         # 2. Add creator as leader
@@ -140,29 +150,30 @@ def create_project():
             VALUES (?, ?, ?)
         """, (project_id, user_id, 'leader'))
 
-        # 3. Invite members
-        for email in member_emails:
-            email = email.strip().lower()
+        # 3. Invite members (if they exist)
+        for email_raw in member_emails:
+            email = email_raw.strip().lower()
             if email:
-                # Check if user exists
                 c.execute("SELECT id FROM users WHERE email = ?", (email,))
                 invited = c.fetchone()
                 if invited:
                     invited_user_id = invited['id']
-                    # Add to invitations
                     c.execute("""
                         INSERT INTO invitations (project_id, invited_by, invited_user_id)
                         VALUES (?, ?, ?)
                     """, (project_id, user_id, invited_user_id))
+
+                    # ✉️ Send invite email after inserting
+                    try:
+                        send_invite_email(email, title, join_code)
+                    except Exception as e:
+                        print(f"Failed to send email to {email}: {e}")
 
         conn.commit()
         conn.close()
         return redirect('/dashboard')
 
     return render_template('create_project.html')
-
-
-
 
 @app.route('/respond_invite', methods=['POST'])
 def respond_invite():
@@ -421,10 +432,76 @@ def profile():
     return render_template('profile.html', user=user)
 
 
-@app.route('/join')
-def join_project_page():
-   
-    return render_template("join.html")
+@app.route('/join', methods=['GET', 'POST'])
+def join_project():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        join_code = request.form.get('join_code')  # SAFER way than request.form['join_code']
+        if not join_code:
+            flash("Please enter a valid join code.")
+            return redirect('/join')
+        
+        
+        user_id = session['user_id']
+
+        conn = sqlite3.connect("data.db")
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+
+        c.execute("SELECT id FROM projects WHERE join_code = ?", (join_code,))
+        project = c.fetchone()
+
+        if not project:
+            flash("Invalid join code.")
+        else:
+            project_id = project['id']
+            # Check if user is already in project
+            c.execute("""
+                SELECT * FROM project_members 
+                WHERE project_id = ? AND user_id = ?
+            """, (project_id, user_id))
+            already_member = c.fetchone()
+            if already_member:
+                flash("You are already a member of this project.")
+            else:
+                c.execute("""
+                    INSERT INTO project_members (project_id, user_id, role)
+                    VALUES (?, ?, ?)
+                """, (project_id, user_id, 'member'))
+                conn.commit()
+                flash("Successfully joined the project!")
+
+        conn.close()
+        return redirect('/dashboard')
+
+    return render_template('join.html')
+
+
+
+
+def send_invite_email(to_email, project_title, join_code):
+    sender_email = "sshabbir.bese23seecs@seecs.edu.pk"
+    sender_password = "exbx mecr mulc zmvd"
+
+    subject = "You've been invited to a Sync project!"
+    body = f"""Hi there,
+
+You've been invited to join the project: {project_title}.
+
+Use this join code to join: {join_code}
+
+Visit the site and go to 'Join Project' to enter the code.
+
+Cheers,
+The Syn Team"""
+
+    message = f"Subject: {subject}\n\n{body}"
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, to_email, message)
 
 
 if __name__ == '__main__':

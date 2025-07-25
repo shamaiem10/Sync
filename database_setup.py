@@ -67,5 +67,14 @@ cursor.execute("""
         )
     """)
 
+try:
+    cursor.execute("ALTER TABLE projects ADD COLUMN join_code TEXT;")
+    print("Column 'join_code' added successfully.")
+except sqlite3.OperationalError as e:
+    if "duplicate column name" in str(e).lower():
+        print("Column 'join_code' already exists.")
+    else:
+        raise e
+
 conn.commit()
 conn.close()
