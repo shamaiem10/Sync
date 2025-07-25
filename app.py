@@ -5,6 +5,9 @@ import string
 from werkzeug.security import generate_password_hash, check_password_hash
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
 
 app = Flask(__name__)
 app.secret_key = 'syn-secret'  # Needed for session
@@ -96,7 +99,7 @@ def dashboard():
         WHERE invitations.invited_user_id = ? AND invitations.status = 'pending'
     """, (user_id,))
     invitations = c.fetchall()
-
+    
     conn.close()
 
     return render_template(
@@ -224,8 +227,16 @@ def my_projects():
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # ✅ Get each project along with total and completed tasks
     cursor.execute("""
-        SELECT p.id, p.title, p.description, p.deadline, pm.role
+        SELECT 
+            p.id, p.title, p.description, p.deadline, pm.role,
+            (
+                SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id
+            ) AS total_tasks,
+            (
+                SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed'
+            ) AS completed_tasks
         FROM project_members pm
         JOIN projects p ON pm.project_id = p.id
         WHERE pm.user_id = ?
@@ -485,24 +496,41 @@ def send_invite_email(to_email, project_title, join_code):
     sender_email = "sshabbir.bese23seecs@seecs.edu.pk"
     sender_password = "exbx mecr mulc zmvd"
 
-    subject = "You've been invited to a Sync project!"
-    body = f"""Hi there,
+    subject = f"You've been invited to join {project_title} on Sync!"
 
-You've been invited to join the project: {project_title}.
+    # HTML email body
+    html = f"""
+    <html>
+      <body style="font-family: 'Segoe UI', sans-serif; background: #f4fdf6; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);">
+          <h2 style="color: #2d4739;">👋 You've been invited!</h2>
+          <p style="font-size: 15px; color: #444;">You’ve been invited to join the project <strong>{project_title}</strong> on <strong>Syn</strong>.</p>
+          <p style="font-size: 15px;">Use the following code to join:</p>
+          <div style="font-size: 20px; font-weight: bold; background: #eaf8ec; color: #2d4739; padding: 12px 20px; display: inline-block; border-radius: 8px; letter-spacing: 1px;">
+            {join_code}
+          </div>
+          <p style="margin-top: 25px;">Click below to join directly:</p>
+          <a href="http://127.0.0.1:5000/join" 
+             style="display: inline-block; padding: 12px 24px; background: #3a614d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            Join Project →
+          </a>
+          <p style="font-size: 13px; margin-top: 30px; color: #888;">If you didn’t expect this invitation, you can ignore this email.</p>
+        </div>
+      </body>
+    </html>
+    """
 
-Use this join code to join: {join_code}
+    message = MIMEMultipart("alternative")
+    message["Subject"] = subject
+    message["From"] = sender_email
+    message["To"] = to_email
 
-Visit the site and go to 'Join Project' to enter the code.
-
-Cheers,
-The Syn Team"""
-
-    message = f"Subject: {subject}\n\n{body}"
+    mime_text = MIMEText(html, "html")
+    message.attach(mime_text)
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, to_email, message)
-
+        server.sendmail(sender_email, to_email, message.as_string())
 
 if __name__ == '__main__':
     app.run(debug=True)

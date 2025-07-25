@@ -133,6 +133,87 @@
       bottom: -120px;
       right: -100px;
     }
+    .project-card {
+  background: #ffffffcc;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+  transition: 0.3s ease;
+  position: relative;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
+}
+
+.project-card h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: #2d4739;
+}
+
+.project-card p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.meta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.badge {
+  background: #3a614d;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-container {
+  width: 100%;
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #3a614d;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 10px;
+  background: linear-gradient(to right, #3a614d, #628c6f);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: linear-gradient(to right, #2e4c3b, #50715a);
+}
+
   </style>
 </head>
 <body>
@@ -146,16 +227,30 @@
     {% if projects %}
       <div class="project-grid">
         {% for project in projects %}
-          <div class="project-card">
-            <h3>{{ project['title'] }}</h3>
-            <p>{{ project['description'] }}</p>
-            <div class="badge">Deadline: {{ project['deadline'] }}</div>
-            <div class="badge">Role: {{ project['role'] }}</div>
-            <a href="/project/{{ project['id'] }}" class="btn">
-              <i class="fas fa-arrow-right"></i> View Details
-            </a>
-          </div>
-        {% endfor %}
+  <div class="project-card">
+    <h3><i class="fas fa-folder-open"></i> {{ project['title'] }}</h3>
+    <p>{{ project['description'] }}</p>
+    
+    <div class="meta-group">
+      <span class="badge"><i class="fas fa-user-tag"></i> {{ project['role'] }}</span>
+      <span class="badge"><i class="fas fa-hourglass-end"></i> Deadline: {{ project['deadline'] }}</span>
+    </div>
+
+    {% set completed = project['completed_tasks'] %}
+    {% set total = project['total_tasks'] %}
+    {% set percent = (completed / total * 100) if total > 0 else 0 %}
+    {% set percent_rounded = percent | round(1) %}
+
+    <!-- 🌿 Gradient Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar" style="width: {{ percent }}%;"></div>
+    </div>
+    <small class="progress-text">{{ completed }} / {{ total }} tasks ({{ percent_rounded }}%)</small>
+
+    <a href="/project/{{ project['id'] }}" class="btn"><i class="fas fa-arrow-right"></i> View Project</a>
+  </div>
+{% endfor %}
+
       </div>
     {% else %}
       <p class="no-projects">You are not part of any projects yet.</p>
