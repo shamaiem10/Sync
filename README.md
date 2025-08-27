@@ -63,8 +63,12 @@ venv\Scripts\activate      # (Windows)
 ```bash
 pip install -r requirements.txt
 ```
+### 4️⃣ Database setup
 
-### 4️⃣ Run the app
+```bash
+python database_setup.py
+```
+### 5️⃣ Run the app
 
 ```bash
 python app.py
