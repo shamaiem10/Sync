@@ -45,30 +45,30 @@
 Follow these steps to run *Sync* locally:
 
 ### 1️⃣ Clone the repo
-bash
-git clone https://github.com/your-username/sync.git
+```bash
+git clone https://github.com/shamaiem10/sync.git
 cd sync
-`
+```
 
 ### 2️⃣ Create a virtual environment
 
-bash
+```bash
 python -m venv venv
 source venv/bin/activate   # (Linux/Mac)
 venv\Scripts\activate      # (Windows)
-
+```
 
 ### 3️⃣ Install dependencies
 
-bash
+```bash
 pip install -r requirements.txt
-
+```
 
 ### 4️⃣ Run the app
 
-bash
-flask run
-
+```bash
+python app.py
+```
 
 App will be live at 👉 *[http://127.0.0.1:5000/](http://127.0.0.1:5000/)*
 
