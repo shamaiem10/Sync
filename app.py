@@ -493,8 +493,8 @@ def join_project():
 
 
 def send_invite_email(to_email, project_title, join_code):
-    sender_email = "sshabbir.bese23seecs@seecs.edu.pk"
-    sender_password = "exbx mecr mulc zmvd"
+    sender_email = ""
+    sender_password = ""
 
     subject = f"You've been invited to join {project_title} on Sync!"
 
